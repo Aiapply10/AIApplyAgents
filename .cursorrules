@@ -1,0 +1,18 @@
+# AI Apply Agents — Cursor Rules
+
+Multi-tenant job auto-apply platform. See AGENTS.md for full agent instructions.
+
+## Key files
+- AGENTS.md — Main agent instructions, service boundaries
+- CLAUDE.md — Claude Code project context
+- CODEX.md — Codex project context
+- docs/MASTER_PROMPT.md — Full multi-agent build plan
+
+## Service paths
+- apps/server — Control Service
+- packages/jobs_scraper — Job Fetcher
+- packages/jobs_applier — Job Applier
+- apps/client — Frontend
+
+## Rules
+Respect service boundaries. Use shared contracts. Keep tasks small and tenant-aware.
