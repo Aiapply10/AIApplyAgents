@@ -1,0 +1,11 @@
+{
+  "name": "@repo/server",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "uv run --package server fastapi dev src/main.py",
+    "build": "uv run --package server python -c \"pass\"",
+    "lint": "uv run --package server ruff check .",
+    "clean": "echo 'no-op'"
+  }
+}

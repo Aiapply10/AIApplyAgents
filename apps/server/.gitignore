@@ -1,0 +1,2 @@
+# App-specific (root .gitignore also applies)
+# .env files are gitignored at root
