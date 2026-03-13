@@ -1,0 +1,11 @@
+{
+  "name": "@repo/jobs-scraper",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "uv run --package jobs-scraper fastapi dev src/main.py --port 8001",
+    "build": "uv run --package jobs-scraper python -c \"pass\"",
+    "lint": "uv run --package jobs-scraper ruff check .",
+    "clean": "echo 'no-op'"
+  }
+}
