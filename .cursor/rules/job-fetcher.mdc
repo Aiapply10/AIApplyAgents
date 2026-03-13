@@ -1,0 +1,27 @@
+---
+description: Job Fetcher (packages/jobs_scraper) — board adapters, fetch, normalization
+globs: packages/jobs_scraper/**/*
+alwaysApply: false
+---
+
+# Job Fetcher Rules
+
+Fetches jobs from boards via APIs or scraping; normalizes to shared domain model.
+
+## Scope
+- Board adapter interface and implementations
+- Fetch command intake
+- Normalization pipeline
+- Dedupe by fingerprint
+- Fetch run event emission
+
+## Do NOT
+- Own user profile CRUD
+- Own application submission logic
+- Own frontend
+- Collapse board logic into controllers
+
+## Conventions
+- One adapter per board
+- Normalized job DTO contract
+- Emit structured events to control service

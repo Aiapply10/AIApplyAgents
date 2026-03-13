@@ -1,0 +1,19 @@
+---
+description: Shared domain contracts, DTOs, and status enums
+globs: "**/shared/**/*","**/contracts/**/*","**/models/**/*"
+alwaysApply: false
+---
+
+# Shared Contracts
+
+Domain DTOs and contracts used across services.
+
+## Conventions
+- Pydantic for Python; TypeScript interfaces for frontend
+- Shared job DTO, workflow DTO, application DTO
+- Status enums: workflow, task, application, fetch run
+- Event payload schemas for inter-service communication
+
+## Rules
+- Contracts defined before feature implementation
+- No service-specific logic in shared modules

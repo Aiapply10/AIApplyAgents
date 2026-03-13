@@ -1,0 +1,25 @@
+---
+description: Frontend (apps/client) — React dashboard, forms, monitoring
+globs: apps/client/**/*
+alwaysApply: false
+---
+
+# Frontend Rules
+
+React + TypeScript + Tailwind + Vite dashboard.
+
+## Scope
+- App shell, routing, dashboards
+- Profile, document, preference, policy forms
+- Workflow and application monitoring UI
+- Artifacts and notification displays
+
+## Do NOT
+- Implement backend business logic in frontend
+- Use giant global state
+
+## Conventions
+- Feature folders aligned with backend domains
+- TanStack Query for data
+- Typed API client matching backend contracts
+- Reusable components (status badge, metric card, table, empty/loading states)

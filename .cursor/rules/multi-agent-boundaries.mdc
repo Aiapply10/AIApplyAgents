@@ -1,0 +1,23 @@
+---
+description: Service boundaries and agent ownership for the job auto-apply platform
+alwaysApply: true
+---
+
+# Multi-Agent Boundaries
+
+## Service Ownership (DO NOT cross)
+
+| Service | Path | Owns | Must NOT implement |
+|---------|------|------|--------------------|
+| Control Service | `apps/server` | Users, profiles, workflows, orchestration, monitoring | Board scraping, browser automation |
+| Job Fetcher | `packages/jobs_scraper` | Board adapters, fetch execution, normalization, dedupe | User CRUD, application logic |
+| Job Applier | `packages/jobs_applier` | Browser automation, form filling, step traces | User CRUD, matching, fetching |
+| Frontend | `apps/client` | UI, forms, dashboards, monitoring views | Backend business logic |
+
+## Rules
+
+1. **Contracts first** — Shared DTOs, status enums, event schemas before feature work
+2. **No duplicate ownership** — Consume contracts, do not re-implement across services
+3. **Tenant-aware** — All major models scoped by tenant
+4. **Resumability & idempotency** — Design for durable, resumable workflows
+5. **Small tasks** — One endpoint, one model, one component per change

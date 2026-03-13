@@ -1,0 +1,28 @@
+---
+description: Job Applier (packages/jobs_applier) — browser automation, application execution
+globs: packages/jobs_applier/**/*
+alwaysApply: false
+---
+
+# Job Applier Rules
+
+Automates application submission via browser (Camoufox); form filling, screenshots, step traces.
+
+## Scope
+- Apply command intake
+- Application execution coordinator
+- Domain/applier strategy interfaces
+- Step trace updates
+- Screenshot artifact registration
+- Result callbacks to control service
+
+## Do NOT
+- Own user management
+- Own matching logic
+- Own fetcher logic
+- Bury domain-specific automation in generic control code
+
+## Conventions
+- Use browser primitives; domain strategies use them
+- Report step traces cleanly
+- One strategy per domain/board
