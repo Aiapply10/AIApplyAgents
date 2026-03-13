@@ -41,6 +41,10 @@ bun install
 
 # Install Python dependencies (uv workspace - single command)
 uv sync --all-packages
+
+# Activate venv (optional — uv run does not require it)
+source .venv/bin/activate   # Linux/macOS
+# .venv\Scripts\activate    # Windows
 ```
 
 ## Commands
