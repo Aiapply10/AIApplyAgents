@@ -1,0 +1,6 @@
+camoufox[geoip]
+transitions
+aiosqlite
+fastapi[standard]
+uvicorn
+
