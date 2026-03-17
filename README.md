@@ -53,7 +53,7 @@ From the repo root:
 
 | Command | Description |
 |---------|--------------|
-| `bun run dev` | Start all apps in dev mode (client, server, jobs_scraper, jobs_applier) |
+| `bun run dev` | Start client, server, jobs_scraper, jobs_applier in dev mode |
 | `bun run build` | Build all workspaces |
 | `bun run lint` | Run lint in all workspaces |
 | `bun run clean` | Clean build artifacts |

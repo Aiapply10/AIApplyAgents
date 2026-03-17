@@ -2,7 +2,7 @@
   "name": "ai-apply-agents",
   "version": "0.1.0",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": ["apps/client", "apps/server", "packages/*"],
   "scripts": {
     "dev": "turbo run dev",
     "dev:reset": "(bunx kill-port 8000 || true) && (bunx kill-port 8001 || true) && (bunx kill-port 8002 || true) && turbo run dev",

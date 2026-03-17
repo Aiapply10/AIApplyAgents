@@ -41,3 +41,9 @@ htmlcov/
 .env.local
 .env.production
 .env.*.local
+
+# Local-only (not committed)
+apps/jobs-applier-ui/
+
+# Local bot state
+*.db
