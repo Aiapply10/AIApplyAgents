@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSessionContext } from "supertokens-auth-react/recipe/session";
 import { upsertProfile, type UserProfile } from "../lib/api";
+import { extractResumeFromFile } from "../lib/resume-api";
 import { useProfile, emptyProfile } from "../hooks/useProfile";
 import Avatar from "../components/Avatar";
 import Logo from "../components/Logo";
@@ -46,45 +47,6 @@ Ask me questions if needed to fill in the details, or fill in what you know abou
 - [Skill 3]
 - [Add more as needed]
 \`\`\``;
-
-const RESUME_PROMPT = `I'm going to paste my resume text below. Please extract the information and respond with ONLY a markdown document using this exact template. Fill in what you can find, leave sections empty if the information isn't in the resume.
-
-\`\`\`markdown
-# Profile
-
-## Full Name
-[Name from resume]
-
-## Headline
-[Current/most recent job title]
-
-## Summary
-[2-3 sentence professional summary based on the resume]
-
-## Location
-[Location if mentioned]
-
-## Phone
-[Phone if mentioned]
-
-## LinkedIn
-[LinkedIn URL if mentioned]
-
-## GitHub
-[GitHub URL if mentioned]
-
-## Portfolio
-[Portfolio URL if mentioned]
-
-## Skills
-- [Extracted skills]
-\`\`\`
-
-Here is my resume:
-
----
-[PASTE YOUR RESUME TEXT HERE]
----`;
 
 // ── Markdown parser ──
 
@@ -206,8 +168,9 @@ export default function Onboarding() {
   const [pasteInput, setPasteInput] = useState("");
   const [parseError, setParseError] = useState("");
 
-  // Resume state
-  const [resumeText, setResumeText] = useState("");
+  // Resume upload state
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   function set<K extends keyof UserProfile>(key: K, value: UserProfile[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -259,6 +222,49 @@ export default function Onboarding() {
         parsed.skills && parsed.skills.length > 0
           ? parsed.skills
           : prev.skills,
+    }));
+
+    setStep(1);
+  }
+
+  async function handleResumeUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+
+    setUploading(true);
+    setParseError("");
+    const { data, error: err } = await extractResumeFromFile(file);
+    setUploading(false);
+
+    if (err || !data) {
+      setParseError(err || "Failed to extract resume");
+      return;
+    }
+
+    // Map extracted resume sections to profile fields
+    const sections = data.sections || [];
+    const header = sections.find((s) => s.title === "Header");
+    const summary = sections.find((s) => s.title === "Summary");
+    const skills = sections.find((s) => s.title === "Skills");
+
+    const headerEntry = header?.entries?.[0] as Record<string, string> | undefined;
+
+    setForm((prev) => ({
+      ...prev,
+      full_name: headerEntry?.full_name || prev.full_name,
+      headline: headerEntry?.title || prev.headline,
+      summary: summary?.content || prev.summary,
+      location: headerEntry?.location || prev.location,
+      phone: headerEntry?.phone || prev.phone,
+      linkedin_url: headerEntry?.linkedin_url || prev.linkedin_url,
+      github_url: headerEntry?.github_url || prev.github_url,
+      portfolio_url: headerEntry?.portfolio_url || prev.portfolio_url,
+      skills: skills?.entries?.length
+        ? skills.entries.flatMap((entry) =>
+            String(entry.skills || "").split(",").map((s) => s.trim()).filter(Boolean)
+          )
+        : prev.skills,
     }));
 
     setStep(1);
@@ -397,7 +403,7 @@ export default function Onboarding() {
                       Upload resume
                     </p>
                     <p className="text-[13px] text-(--color-text-tertiary) mt-0.5">
-                      Copy a prompt + your resume text into a chatbot to extract your profile.
+                      Upload a PDF or DOCX and AI will fill your profile automatically.
                     </p>
                   </div>
                 </button>
@@ -478,83 +484,66 @@ export default function Onboarding() {
             </div>
           )}
 
-          {/* ── Step 0 sub-view: Resume ── */}
+          {/* ── Step 0 sub-view: Resume Upload ── */}
           {step === 0 && subView === "resume" && (
             <div className="animate-fade-up">
+              <input ref={fileRef} type="file" accept=".pdf,.docx" className="hidden" onChange={handleResumeUpload} />
+
               <div className="mb-8">
                 <p className="text-[12px] text-(--color-text-tertiary) uppercase tracking-widest mb-1">
                   Resume Import
                 </p>
                 <h1 className="font-display text-3xl font-bold text-(--color-text) tracking-tight">
-                  Import from resume
+                  Upload your resume
                 </h1>
                 <p className="text-sm text-(--color-text-secondary) mt-1">
-                  Copy this prompt into a chatbot along with your resume text, then paste the response below.
+                  Upload a PDF or DOCX file and AI will extract your profile information automatically.
                 </p>
               </div>
 
-              <CopyablePrompt
-                text={RESUME_PROMPT}
-                copied={copied}
-                onCopy={async () => {
-                  await navigator.clipboard.writeText(RESUME_PROMPT);
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 2000);
-                }}
-              />
-
-              <div className="mb-4">
-                <label className="block text-[13px] font-semibold text-(--color-text) mb-2">
-                  Paste the chatbot's response
-                </label>
-                <textarea
-                  value={resumeText}
-                  onChange={(e) => { setResumeText(e.target.value); setParseError(""); }}
-                  placeholder="Paste the markdown response here..."
-                  rows={6}
-                  className={`${inputClass} resize-none font-mono text-[12px]`}
-                />
-              </div>
-
-              {parseError && (
-                <div className="rounded-lg bg-(--color-error-bg) border border-(--color-error)/10 px-4 py-3 text-sm text-(--color-error) mb-4">
-                  {parseError}
+              {uploading ? (
+                <div className="flex flex-col items-center gap-4 py-12">
+                  <div className="w-12 h-12 border-3 border-(--color-accent) border-t-transparent rounded-full animate-spin-slow" />
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-(--color-text)">Extracting your profile...</p>
+                    <p className="text-xs text-(--color-text-tertiary) mt-1">AI is analyzing your resume</p>
+                  </div>
                 </div>
-              )}
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    className="w-full flex flex-col items-center gap-4 glow-card rounded-2xl p-10 text-center transition-all duration-200 group cursor-pointer"
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-(--color-surface-sunken) to-(--color-surface) flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                      <svg className="w-6 h-6 text-(--color-accent)" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-(--color-text) group-hover:text-(--color-accent) transition-colors">
+                        Click to upload PDF or DOCX
+                      </p>
+                      <p className="text-[12px] text-(--color-text-tertiary) mt-1">
+                        Max 10 MB
+                      </p>
+                    </div>
+                  </button>
 
-              <div className="flex items-center justify-between">
-                <button type="button" onClick={() => { setSubView("choose"); setParseError(""); }} className="text-[13px] text-(--color-text-secondary) hover:text-(--color-text) transition-colors cursor-pointer">
-                  Back
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setParseError("");
-                    const parsed = parseProfileMarkdown(resumeText);
-                    if (!parsed.full_name) {
-                      setParseError("Could not find a Full Name. Make sure the chatbot used the template format.");
-                      return;
-                    }
-                    setForm((prev) => ({
-                      ...prev,
-                      full_name: parsed.full_name || prev.full_name,
-                      headline: parsed.headline || prev.headline,
-                      summary: parsed.summary || prev.summary,
-                      location: parsed.location || prev.location,
-                      phone: parsed.phone || prev.phone,
-                      linkedin_url: parsed.linkedin_url || prev.linkedin_url,
-                      github_url: parsed.github_url || prev.github_url,
-                      portfolio_url: parsed.portfolio_url || prev.portfolio_url,
-                      skills: parsed.skills && parsed.skills.length > 0 ? parsed.skills : prev.skills,
-                    }));
-                    setStep(1);
-                  }}
-                  disabled={!resumeText.trim()}
-                  className="accent-gradient px-6 py-3 rounded-xl text-sm font-bold text-white hover:opacity-90 shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer"
-                >
-                  Parse & Continue
-                </button>
-              </div>
+                  {parseError && (
+                    <div className="rounded-lg bg-(--color-error-bg) border border-(--color-error)/10 px-4 py-3 text-sm text-(--color-error) mt-4">
+                      {parseError}
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between mt-6">
+                    <button type="button" onClick={() => { setSubView("choose"); setParseError(""); }} className="text-[13px] text-(--color-text-secondary) hover:text-(--color-text) transition-colors cursor-pointer">
+                      Back
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
