@@ -1,141 +1,244 @@
 # AI Apply Agents
 
-A Turborepo + Bun monorepo with a React frontend and FastAPI backend services.
+Multi-tenant job auto-apply platform with AI-powered resume building and tailoring. Three core services: **Control Service** (orchestration, APIs, UI), **Job Fetcher** (scraping/APIs), and **Job Applier** (browser automation).
 
 ## Tech Stack
 
 | Technology | Purpose |
 |------------|---------|
-| [Turborepo](https://turbo.build/) | Monorepo task orchestration |
-| [Bun](https://bun.sh/) | Node.js runtime & package manager |
-| [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) + [Vite](https://vitejs.dev/) | Client app |
-| [FastAPI](https://fastapi.tiangolo.com/) | Python API framework |
-| [uv](https://docs.astral.sh/uv/) | Python package manager |
+| [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) + [Tailwind](https://tailwindcss.com/) + [Vite](https://vitejs.dev/) | Frontend |
+| [FastAPI](https://fastapi.tiangolo.com/) + [Pydantic](https://docs.pydantic.dev/) | Backend APIs |
+| [MongoDB](https://www.mongodb.com/) | Database |
+| [SuperTokens](https://supertokens.com/) | Authentication (email/password + Google OAuth) |
+| [Anthropic Claude](https://docs.anthropic.com/) | AI resume extraction and tailoring |
+| [Turborepo](https://turbo.build/) + [Bun](https://bun.sh/) | Monorepo orchestration |
+| [uv](https://docs.astral.sh/uv/) | Python package management |
 
 ## Project Structure
 
 ```
 ├── apps/
-│   ├── client/          # React + TypeScript + Vite
-│   └── server/           # FastAPI main server
+│   ├── client/              # React frontend (port 5173)
+│   └── server/              # Control Service API (port 8000)
 ├── packages/
-│   ├── jobs_scraper/     # FastAPI jobs scraper service
-│   └── jobs_applier/     # FastAPI jobs applier service
-├── package.json          # Bun workspaces
-├── pyproject.toml        # uv workspace (single lockfile for Python)
-├── turbo.json
+│   ├── jobs_scraper/        # Job Fetcher service (port 8001)
+│   └── jobs_applier/        # Job Applier service (port 8002)
+├── docker-compose.yml       # MongoDB + SuperTokens + PostgreSQL
+├── package.json             # Bun workspaces
+├── pyproject.toml           # uv workspace
 └── uv.lock
 ```
 
 ## Prerequisites
 
 - [Bun](https://bun.sh/) >= 1.3.x
-- [uv](https://docs.astral.sh/uv/install/) (Python)
+- [uv](https://docs.astral.sh/uv/install/)
 - Python 3.12+
+- [Docker](https://docs.docker.com/get-docker/) + Docker Compose (for MongoDB and SuperTokens)
 
-## Setup
+## Quick Start
+
+### 1. Start infrastructure
 
 ```bash
-# Install Node dependencies (Bun)
+docker compose up -d
+```
+
+This starts:
+- **MongoDB** on `localhost:27017`
+- **SuperTokens Core** on `localhost:3567` (backed by PostgreSQL)
+- **PostgreSQL** on `localhost:5432` (for SuperTokens)
+
+### 2. Install dependencies
+
+```bash
+# Node dependencies
 bun install
 
-# Install Python dependencies (uv workspace - single command)
+# Python dependencies (all packages)
 uv sync --all-packages
-
-# Activate venv (optional — uv run does not require it)
-source .venv/bin/activate   # Linux/macOS
-# .venv\Scripts\activate    # Windows
 ```
+
+### 3. Configure environment
+
+Copy example env files and configure:
+
+```bash
+# Server
+cp apps/server/.env.example apps/server/.env.local
+
+# Client
+cp apps/client/.env.example apps/client/.env.local
+```
+
+Edit `apps/server/.env.local`:
+
+```env
+ENVIRONMENT=development
+MONGODB_URI=mongodb://localhost:27017
+DB_NAME=ai_apply_agents
+
+# SuperTokens (runs from docker compose)
+SUPERTOKENS_CONNECTION_URI=http://localhost:3567
+
+# Domains
+API_DOMAIN=http://localhost:8000
+WEBSITE_DOMAIN=http://localhost:5173
+
+# Google OAuth (optional — get from Google Cloud Console)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# AI features — get from https://console.anthropic.com/
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Admin bootstrap — set to your email to get admin access on startup
+ADMIN_EMAIL=you@example.com
+```
+
+### 4. Start development
+
+```bash
+# All services (client + server + scraper + applier)
+bun run dev
+
+# Or individual services
+bun run dev --filter=@repo/client    # Frontend only
+bun run dev --filter=@repo/server    # Backend only
+```
+
+### 5. Open the app
+
+- **Frontend**: http://localhost:5173
+- **API docs**: http://localhost:8000/docs
+- **SuperTokens dashboard**: http://localhost:3567/dashboard
+
+## Features
+
+### For Users (Members)
+
+- **Auth**: Email/password signup + Google OAuth
+- **Profile**: Onboarding flow, profile editor with completeness tracking
+- **Resume Builder**: 12 section types (Header, Summary, Skills, Experience, Projects, Education, Certifications, Achievements, Open Source, Leadership, Publications, Additional)
+- **Resume Upload**: Upload PDF/DOCX, AI extracts and structures content into the editor
+- **AI Builder**: Generate resume from ChatGPT/Claude markdown output
+- **Resume Analyzer**: 8-category scoring (100-point scale) with issues, suggestions, keyword analysis
+- **Master Profile**: Single source of truth for all career data across resumes
+- **AI Resume Tailoring**: Generate role-targeted resumes from master profile + job description
+
+### For Admins
+
+- **RBAC**: Three roles (admin, manager, member) with backend enforcement
+- **Admin Dashboard**: System overview with user counts, role distribution, recent signups
+- **User Management**: Search, filter, edit roles, toggle active, delete
+- **Tenant Management**: CRUD tenants with plan/settings
+- **Audit Log**: Filterable activity trail with expandable detail
+- **Notifications**: Send and manage system notifications
+
+## Architecture
+
+### Service Boundaries
+
+| Service | Responsibility |
+|---------|---------------|
+| **Control Service** (`apps/server`) | Users, profiles, resumes, workflows, orchestration |
+| **Job Fetcher** (`packages/jobs_scraper`) | Board adapters, fetch execution, normalization |
+| **Job Applier** (`packages/jobs_applier`) | Browser automation, form filling |
+
+### Key Design Decisions
+
+- All models are **tenant-scoped** for multi-tenancy
+- **Pydantic** schemas for type-safe request/response on backend
+- **TypeScript strict** mode on frontend
+- Designed for **resumability and idempotency**
+- Route-based **color theming** (each section has its own accent color)
 
 ## Commands
 
-From the repo root:
-
 | Command | Description |
-|---------|--------------|
-| `bun run dev` | Start client, server, jobs_scraper, jobs_applier in dev mode |
+|---------|-------------|
+| `bun run dev` | Start all services in dev mode |
+| `bun run dev:reset` | Kill ports 8000-8002 + start dev |
 | `bun run build` | Build all workspaces |
-| `bun run lint` | Run lint in all workspaces |
+| `bun run lint` | Lint all workspaces |
 | `bun run clean` | Clean build artifacts |
+| `docker compose up -d` | Start MongoDB + SuperTokens |
+| `docker compose down` | Stop infrastructure |
+| `uv sync --all-packages` | Sync all Python dependencies |
 
-## Running Individual Apps
+## Dev Server Ports
 
-```bash
-# Client only
-bun run dev --filter=@repo/client
-
-# Server only
-bun run dev --filter=@repo/server
-
-# Jobs scraper only
-bun run dev --filter=@repo/jobs-scraper
-
-# Jobs applier only
-bun run dev --filter=@repo/jobs-applier
-```
+| Service | Port |
+|---------|------|
+| Client (Vite) | 5173 |
+| Control Service (FastAPI) | 8000 |
+| Job Fetcher | 8001 |
+| Job Applier | 8002 |
+| SuperTokens Core | 3567 |
+| MongoDB | 27017 |
+| PostgreSQL | 5432 |
 
 ## Environment Variables
 
-Each project has `.env.local` and `.env.production` (gitignored). Copy from `.env.example` to get started.
+### Server (`apps/server/.env.local`)
 
-| Project | Env Loader | Files |
-|---------|------------|-------|
-| **Client** | Vite (built-in) | `.env.local`, `.env.production` — only `VITE_*` vars exposed |
-| **Server** | pydantic-settings | `MONGODB_URI`, `ENVIRONMENT` |
-| **jobs_scraper** | pydantic-settings | `MONGODB_URI`, `CONTROL_SERVICE_URL` |
-| **jobs_applier** | pydantic-settings | `MONGODB_URI`, `CONTROL_SERVICE_URL` |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `MONGODB_URI` | Yes | MongoDB connection string |
+| `DB_NAME` | No | Database name (default: `ai_apply_agents`) |
+| `SUPERTOKENS_CONNECTION_URI` | Yes | SuperTokens Core URL |
+| `SUPERTOKENS_API_KEY` | No | SuperTokens API key |
+| `API_DOMAIN` | No | Backend URL (default: `http://localhost:8000`) |
+| `WEBSITE_DOMAIN` | No | Frontend URL (default: `http://localhost:5173`) |
+| `GOOGLE_CLIENT_ID` | No | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | No | Google OAuth client secret |
+| `ANTHROPIC_API_KEY` | No | Enables AI resume extraction and tailoring |
+| `ADMIN_EMAIL` | No | Email to auto-promote to admin on startup |
 
-Import `settings` from `config` in Python services; use `import.meta.env.VITE_*` in the client.
+### Client (`apps/client/.env.local`)
 
-## Python Workspace (uv)
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VITE_API_URL` | No | Backend API URL (default: `http://localhost:8000`) |
 
-Python packages share a single `uv.lock` at the root. To add a dependency to a specific package:
+## Python Dependencies
+
+Python packages share a single `uv.lock` at the root. To add a dependency:
 
 ```bash
 uv add <package> --package server
 uv add <package> --package jobs-scraper
 uv add <package> --package jobs-applier
-```
-
-After adding deps, regenerate the lockfile:
-
-```bash
 uv lock
 ```
 
-## Dev Server Ports
-
-| App | Default Port |
-|-----|--------------|
-| Client (Vite) | 5173 |
-| Server (FastAPI) | 8000 |
-| jobs_scraper | 8001 |
-| jobs_applier | 8002 |
-
 ## Troubleshooting
 
-**"Address already in use" / port conflicts**
-
-If `bun run dev` fails with `[Errno 98] Address already in use`, ports 8000–8002 may be in use by leftover processes. Use:
+**"Address already in use"**
 
 ```bash
 bun run dev:reset
-```
-
-This clears those ports and starts dev. On Linux you can also manually free ports:
-
-```bash
+# or manually:
 fuser -k 8000/tcp 8001/tcp 8002/tcp
 ```
 
-## Agent Prompting Files
+**MongoDB not running**
 
-For AI coding agents (Cursor, Claude Code, Codex, etc.):
+```bash
+docker compose up -d
+# Check status:
+docker compose ps
+```
 
-| File | Purpose |
-|------|---------|
-| `AGENTS.md` | Main agent instructions, service boundaries, commands |
-| `CLAUDE.md` | Claude Code project context |
-| `CODEX.md` | Codex project context |
-| `docs/MASTER_PROMPT.md` | Full multi-agent build plan and agent topology |
-| `.cursor/rules/*.mdc` | Per-domain Cursor rules (control, fetcher, applier, frontend) |
+**SuperTokens connection error**
+
+Ensure Docker is running and SuperTokens is healthy:
+
+```bash
+docker compose logs supertokens
+curl http://localhost:3567/hello  # Should return "Hello"
+```
+
+**AI features not working**
+
+Set `ANTHROPIC_API_KEY` in `apps/server/.env.local`. Required for resume extraction (PDF/DOCX upload) and AI resume tailoring.

@@ -68,3 +68,7 @@ export async function upsertProfile(userId: string, data: Partial<UserProfile>) 
     body: JSON.stringify(data),
   });
 }
+
+export async function deleteProfile(userId: string) {
+  return request<null>(`/users/${userId}/profile`, { method: "DELETE" });
+}
