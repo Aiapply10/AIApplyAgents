@@ -10,7 +10,7 @@ const STATIC_LABELS: Record<string, string> = {
   profile: "Profile",
   resumes: "Resumes",
   new: "New Resume",
-  "from-ai": "Generate with AI",
+
   analyze: "Analyzer",
   preview: "Preview",
   "master-profile": "Master Profile",

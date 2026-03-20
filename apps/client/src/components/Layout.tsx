@@ -52,7 +52,7 @@ const nav: NavItem[] = [
       { to: "/resumes", label: "Gallery" },
       { to: "/master-profile", label: "Master Profile" },
       { to: "/resumes/new", label: "New Resume" },
-      { to: "/resumes/from-ai", label: "AI Builder" },
+
       { to: "/resumes/analyze", label: "Analyzer" },
     ],
   },
