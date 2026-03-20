@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getMasterSections,
   updateMasterSections,
@@ -17,6 +18,7 @@ import ResumeSectionEditor from "../components/ResumeSectionEditor";
 import Toast from "../components/Toast";
 
 export default function MasterProfile() {
+  const navigate = useNavigate();
   const [sections, setSections] = useState<ResumeSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -157,15 +159,26 @@ export default function MasterProfile() {
               {saving && <span className="ml-2 text-(--color-text-tertiary)">Saving...</span>}
             </p>
           </div>
-          <button
-            onClick={() => setImportOpen(true)}
-            className="shrink-0 rounded-lg border border-(--color-border) bg-(--color-surface-raised) text-[13px] font-semibold text-(--color-text-secondary) hover:text-(--color-text) hover:border-(--color-text-tertiary) shadow-sm transition-all duration-200 cursor-pointer px-3 sm:px-4 py-2 inline-flex items-center gap-1.5"
-          >
-            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
-            </svg>
-            <span className="hidden sm:inline">Import</span>
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setImportOpen(true)}
+              className="rounded-lg border border-(--color-border) bg-(--color-surface-raised) text-[13px] font-semibold text-(--color-text-secondary) hover:text-(--color-text) hover:border-(--color-text-tertiary) shadow-sm transition-all duration-200 cursor-pointer px-3 sm:px-4 py-2 inline-flex items-center gap-1.5"
+            >
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+              </svg>
+              <span className="hidden sm:inline">Import</span>
+            </button>
+            <button
+              onClick={() => navigate("/resumes/new")}
+              className="accent-gradient px-3 sm:px-4 py-2 rounded-lg text-[13px] font-bold text-white hover:opacity-90 shadow-sm transition-all duration-200 cursor-pointer inline-flex items-center gap-1.5"
+            >
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              <span className="hidden sm:inline">New Resume</span>
+            </button>
+          </div>
         </div>
 
         {/* Section tabs + editor */}

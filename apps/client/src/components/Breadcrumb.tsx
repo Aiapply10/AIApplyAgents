@@ -27,12 +27,23 @@ export default function Breadcrumb() {
   const location = useLocation();
   const params = useParams<{ id?: string }>();
 
-  const segments = location.pathname.split("/").filter(Boolean);
+  const pathname = location.pathname;
+  const segments = pathname.split("/").filter(Boolean);
 
   // Don't render breadcrumb on Dashboard (root)
   if (segments.length === 0) return null;
 
   const crumbs: Crumb[] = [{ label: "Home", to: "/" }];
+
+  // Custom parent paths — pages that logically live under another section
+  const PARENT_PATHS: Record<string, Crumb[]> = {
+    "/master-profile": [{ label: "Resumes", to: "/resumes" }],
+  };
+
+  const parentCrumbs = PARENT_PATHS[pathname];
+  if (parentCrumbs) {
+    crumbs.push(...parentCrumbs);
+  }
 
   let path = "";
   for (let i = 0; i < segments.length; i++) {
