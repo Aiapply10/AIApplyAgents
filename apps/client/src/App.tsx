@@ -9,7 +9,7 @@ import AuthCallback from "./pages/AuthCallback";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Resumes from "./pages/Resumes";
-import ResumeFromAI from "./pages/ResumeFromAI";
+
 import Onboarding from "./pages/Onboarding";
 import ResumeAnalyzer from "./pages/ResumeAnalyzer";
 import MasterProfile from "./pages/MasterProfile";
@@ -202,18 +202,6 @@ function App() {
                 <RequireProfile>
                   <Layout>
                     <ResumeEditorLazy />
-                  </Layout>
-                </RequireProfile>
-              </ProtectedWithProfile>
-            }
-          />
-          <Route
-            path="/resumes/from-ai"
-            element={
-              <ProtectedWithProfile>
-                <RequireProfile>
-                  <Layout>
-                    <ResumeFromAI />
                   </Layout>
                 </RequireProfile>
               </ProtectedWithProfile>

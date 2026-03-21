@@ -15,7 +15,7 @@ interface NavItem {
   colorActive: string; // text color when active
   colorBg: string;     // bg tint when active
   colorBorder: string; // left border when active
-  children?: { to: string; label: string }[];
+  children?: { to: string; label: string; action?: { to: string; title: string } }[];
 }
 
 const nav: NavItem[] = [
@@ -50,9 +50,7 @@ const nav: NavItem[] = [
     ),
     children: [
       { to: "/resumes", label: "Gallery" },
-      { to: "/master-profile", label: "Master Profile" },
-      { to: "/resumes/new", label: "New Resume" },
-      { to: "/resumes/from-ai", label: "AI Builder" },
+      { to: "/master-profile", label: "Master Profile", action: { to: "/resumes/new", title: "New Resume" } },
       { to: "/resumes/analyze", label: "Analyzer" },
     ],
   },
@@ -243,21 +241,37 @@ export default function Layout({ children }: { children: ReactNode }) {
                     {isOpen && (
                       <div className="ml-9 mt-1 space-y-0.5 border-l border-(--color-border) pl-3">
                         {item.children!.map((child) => (
-                          <NavLink
-                            key={child.to}
-                            to={child.to}
-                            end
-                            onClick={() => setMobileOpen(false)}
-                            className={({ isActive }) =>
-                              `block px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all duration-200 ${
-                                isActive
-                                  ? `${item.colorActive} ${item.colorBg}`
-                                  : "text-(--color-text-tertiary) hover:text-(--color-text) hover:bg-(--color-surface-sunken)"
-                              }`
-                            }
-                          >
-                            {child.label}
-                          </NavLink>
+                          <div key={child.to} className="flex items-center gap-0.5">
+                            <NavLink
+                              to={child.to}
+                              end
+                              onClick={() => setMobileOpen(false)}
+                              className={({ isActive }) =>
+                                `flex-1 block px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all duration-200 ${
+                                  isActive
+                                    ? `${item.colorActive} ${item.colorBg}`
+                                    : "text-(--color-text-tertiary) hover:text-(--color-text) hover:bg-(--color-surface-sunken)"
+                                }`
+                              }
+                            >
+                              {child.label}
+                            </NavLink>
+                            {child.action && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setMobileOpen(false);
+                                  navigate(child.action!.to);
+                                }}
+                                title={child.action.title}
+                                className="p-1 rounded-md text-(--color-text-tertiary) hover:text-(--color-accent) hover:bg-(--color-accent-subtle) transition-all duration-150 cursor-pointer shrink-0"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
                         ))}
                       </div>
                     )}

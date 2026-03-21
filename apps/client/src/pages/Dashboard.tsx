@@ -1,8 +1,16 @@
 import { useNavigate } from "react-router-dom";
+import { useSessionContext } from "supertokens-auth-react/recipe/session";
+import { deleteProfile } from "../lib/api";
+import { useProfile } from "../hooks/useProfile";
 import ProfileCompleteness from "../components/ProfileCompleteness";
+
+const isDev = import.meta.env.DEV;
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const session = useSessionContext();
+  const { refresh } = useProfile();
+  const userId = !session.loading && session.doesSessionExist ? session.userId : "";
 
   return (
     <>
@@ -171,6 +179,23 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+
+      {/* Dev-only: reset profile to re-trigger onboarding */}
+      {isDev && (
+        <div className="mt-12 pt-6 border-t border-dashed border-(--color-border)">
+          <button
+            onClick={async () => {
+              if (!userId || !confirm("Reset your profile? This will delete your profile and redirect to onboarding.")) return;
+              await deleteProfile(userId);
+              await refresh();
+              navigate("/onboarding");
+            }}
+            className="px-4 py-2 rounded-lg border border-dashed border-(--color-error)/40 text-[12px] font-mono text-(--color-error) hover:bg-(--color-error-bg) transition-colors cursor-pointer"
+          >
+            [DEV] Reset Profile & Onboarding
+          </button>
+        </div>
+      )}
     </>
   );
 }

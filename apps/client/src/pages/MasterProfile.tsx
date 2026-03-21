@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   getMasterSections,
   updateMasterSections,
-  tailorResume,
   listResumes,
   importToMasterSections,
   extractResumeFromFile,
@@ -25,12 +24,6 @@ export default function MasterProfile() {
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("Header");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-
-  // Tailor state
-  const [tailorOpen, setTailorOpen] = useState(false);
-  const [tailorRole, setTailorRole] = useState("");
-  const [tailorJd, setTailorJd] = useState("");
-  const [tailoring, setTailoring] = useState(false);
 
   // Import state
   const [importOpen, setImportOpen] = useState(false);
@@ -85,23 +78,6 @@ export default function MasterProfile() {
 
   function updateSection(updated: ResumeSection) {
     handleSectionsChange(sections.map((s) => (s.id === updated.id ? updated : s)));
-  }
-
-  // Tailor
-  async function handleTailor() {
-    if (!tailorRole.trim()) return;
-    setTailoring(true);
-    const res = await tailorResume({
-      target_role: tailorRole.trim(),
-      job_description: tailorJd.trim(),
-    });
-    setTailoring(false);
-    if (res.error) {
-      setToast({ message: res.error, type: "error" });
-    } else if (res.data) {
-      setTailorOpen(false);
-      navigate(`/resumes/${res.data._id}`);
-    }
   }
 
   // Import from existing resume
@@ -194,13 +170,13 @@ export default function MasterProfile() {
               <span className="hidden sm:inline">Import</span>
             </button>
             <button
-              onClick={() => setTailorOpen(true)}
+              onClick={() => navigate("/resumes/new")}
               className="accent-gradient px-3 sm:px-4 py-2 rounded-lg text-[13px] font-bold text-white hover:opacity-90 shadow-sm transition-all duration-200 cursor-pointer inline-flex items-center gap-1.5"
             >
-              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456Z" />
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
-              <span className="hidden sm:inline">Tailor Resume</span>
+              <span className="hidden sm:inline">New Resume</span>
             </button>
           </div>
         </div>
@@ -390,62 +366,6 @@ export default function MasterProfile() {
         </div>
       )}
 
-      {/* Tailor modal */}
-      {tailorOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !tailoring && setTailorOpen(false)} />
-          <div className="relative glass-card rounded-2xl p-6 w-full max-w-lg animate-fade-up" style={{ animationDuration: "0.2s" }}>
-            {tailoring ? (
-              <div className="flex flex-col items-center gap-4 py-8">
-                <div className="w-10 h-10 border-3 border-(--color-accent) border-t-transparent rounded-full animate-spin-slow" />
-                <div className="text-center">
-                  <p className="text-sm font-semibold text-(--color-text)">Tailoring resume...</p>
-                  <p className="text-xs text-(--color-text-tertiary) mt-1">AI is crafting a targeted resume from your master profile</p>
-                </div>
-              </div>
-            ) : (
-              <>
-                <h3 className="font-display text-lg font-bold text-(--color-text) mb-1">Tailor a New Resume</h3>
-                <p className="text-xs text-(--color-text-tertiary) mb-5">
-                  AI will select and rewrite the most relevant entries from your master profile for this role.
-                </p>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-(--color-text-tertiary) uppercase tracking-wider mb-1.5">Target Role *</label>
-                    <input
-                      type="text"
-                      value={tailorRole}
-                      onChange={(e) => setTailorRole(e.target.value)}
-                      placeholder="e.g. Senior Frontend Engineer"
-                      className="w-full px-3 py-2.5 rounded-lg bg-(--color-surface-sunken) border border-(--color-border) text-sm text-(--color-text) placeholder:text-(--color-text-tertiary) outline-none input-glow focus:border-(--color-accent)"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-(--color-text-tertiary) uppercase tracking-wider mb-1.5">Job Description (optional)</label>
-                    <textarea
-                      value={tailorJd}
-                      onChange={(e) => setTailorJd(e.target.value)}
-                      placeholder="Paste the job description here for better targeting..."
-                      rows={5}
-                      className="w-full px-3 py-2.5 rounded-lg bg-(--color-surface-sunken) border border-(--color-border) text-sm text-(--color-text) placeholder:text-(--color-text-tertiary) outline-none input-glow focus:border-(--color-accent) resize-none"
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end gap-2 mt-6">
-                  <button onClick={() => setTailorOpen(false)} className="btn-secondary">Cancel</button>
-                  <button
-                    onClick={handleTailor}
-                    disabled={!tailorRole.trim()}
-                    className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    Generate Tailored Resume
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
     </>
   );
 }
