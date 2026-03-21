@@ -1,4 +1,4 @@
-"""Resume repository — CRUD on the resumes collection."""
+"""Resume repository — CRUD on the resumes collection, scoped by tenant + user."""
 
 from datetime import datetime, timezone
 
@@ -15,10 +15,10 @@ async def create_resume(db: AsyncIOMotorDatabase, data: dict) -> str:
 
 
 async def get_resume(
-    db: AsyncIOMotorDatabase, tenant_id: str, resume_id: str
+    db: AsyncIOMotorDatabase, tenant_id: str, user_id: str, resume_id: str
 ) -> dict | None:
     return await db.resumes.find_one(
-        {"_id": ObjectId(resume_id), "tenant_id": tenant_id}
+        {"_id": ObjectId(resume_id), "tenant_id": tenant_id, "user_id": user_id}
     )
 
 
@@ -39,20 +39,20 @@ async def list_resumes(
 
 
 async def update_resume(
-    db: AsyncIOMotorDatabase, tenant_id: str, resume_id: str, updates: dict
+    db: AsyncIOMotorDatabase, tenant_id: str, user_id: str, resume_id: str, updates: dict
 ) -> bool:
     updates["updated_at"] = datetime.now(timezone.utc)
     result = await db.resumes.update_one(
-        {"_id": ObjectId(resume_id), "tenant_id": tenant_id},
+        {"_id": ObjectId(resume_id), "tenant_id": tenant_id, "user_id": user_id},
         {"$set": updates},
     )
     return result.modified_count > 0
 
 
 async def delete_resume(
-    db: AsyncIOMotorDatabase, tenant_id: str, resume_id: str
+    db: AsyncIOMotorDatabase, tenant_id: str, user_id: str, resume_id: str
 ) -> bool:
     result = await db.resumes.delete_one(
-        {"_id": ObjectId(resume_id), "tenant_id": tenant_id}
+        {"_id": ObjectId(resume_id), "tenant_id": tenant_id, "user_id": user_id}
     )
     return result.deleted_count > 0
