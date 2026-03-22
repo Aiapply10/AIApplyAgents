@@ -47,5 +47,17 @@ class Settings(BaseSettings):
     # Admin bootstrap — set to promote a user to admin on startup
     admin_email: str = ""
 
+    # Storage — "local" for filesystem, "s3" for S3-compatible
+    storage_backend: str = "local"
+    upload_dir: str = "uploads"
+
+    # S3 config (only needed when storage_backend=s3)
+    s3_bucket: str = ""
+    s3_region: str = "us-east-1"
+    s3_access_key: str = ""
+    s3_secret_key: str = ""
+    s3_endpoint_url: str = ""  # for MinIO, R2, etc.
+    s3_public_url: str = ""    # custom CDN/public URL prefix
+
 
 settings = Settings()
