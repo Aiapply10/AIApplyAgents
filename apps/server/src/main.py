@@ -10,14 +10,15 @@ import dependencies
 from config import settings
 from db import close_db, init_db
 from routers.admin import router as admin_router
+from routers.master_sections import router as master_sections_router
 from routers.monitoring import router as monitoring_router
 from routers.policies import router as policies_router
 from routers.preferences import router as preferences_router
 from routers.profiles import router as profiles_router
+from routers.resumes import router as resumes_router
+from routers.uploads import router as uploads_router
 from routers.tenants import router as tenants_router
 from routers.users import router as users_router
-from routers.resumes import router as resumes_router
-from routers.master_sections import router as master_sections_router
 from routers.workflows import router as workflows_router
 from supertokens_config import init_supertokens
 
@@ -33,8 +34,8 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 async def _ensure_default_tenant() -> None:
     """Create the default tenant if it doesn't exist, store its ID globally."""
-    from db import get_db
     import supertokens_config
+    from db import get_db
 
     db = get_db()
     tenant = await db.tenants.find_one({"slug": "default"})
@@ -118,6 +119,7 @@ app.include_router(policies_router)
 app.include_router(workflows_router)
 app.include_router(resumes_router)
 app.include_router(master_sections_router)
+app.include_router(uploads_router)
 app.include_router(monitoring_router)
 app.include_router(admin_router)
 
