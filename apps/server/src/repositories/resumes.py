@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from models.resumes import Resume
+
 
 async def create_resume(db: AsyncIOMotorDatabase, data: dict) -> str:
     now = datetime.now(timezone.utc)
@@ -16,10 +18,11 @@ async def create_resume(db: AsyncIOMotorDatabase, data: dict) -> str:
 
 async def get_resume(
     db: AsyncIOMotorDatabase, tenant_id: str, user_id: str, resume_id: str
-) -> dict | None:
-    return await db.resumes.find_one(
+) -> Resume | None:
+    doc = await db.resumes.find_one(
         {"_id": ObjectId(resume_id), "tenant_id": tenant_id, "user_id": user_id}
     )
+    return Resume(**doc) if doc else None
 
 
 async def list_resumes(
@@ -28,14 +31,14 @@ async def list_resumes(
     user_id: str,
     skip: int = 0,
     limit: int = 50,
-) -> list[dict]:
+) -> list[Resume]:
     cursor = (
         db.resumes.find({"tenant_id": tenant_id, "user_id": user_id})
         .sort("updated_at", -1)
         .skip(skip)
         .limit(limit)
     )
-    return await cursor.to_list(length=limit)
+    return [Resume(**d) for d in await cursor.to_list(length=limit)]
 
 
 async def update_resume(

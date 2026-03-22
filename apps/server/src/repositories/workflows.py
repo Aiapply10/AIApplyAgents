@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from models.runs import TaskRun, WorkflowRun
+
 
 # ── workflow_runs ──
 
@@ -19,10 +21,11 @@ async def create_workflow(db: AsyncIOMotorDatabase, data: dict) -> str:
 
 async def get_workflow(
     db: AsyncIOMotorDatabase, tenant_id: str, workflow_id: str
-) -> dict | None:
-    return await db.workflow_runs.find_one(
+) -> WorkflowRun | None:
+    doc = await db.workflow_runs.find_one(
         {"_id": ObjectId(workflow_id), "tenant_id": tenant_id}
     )
+    return WorkflowRun(**doc) if doc else None
 
 
 async def list_workflows(
@@ -31,12 +34,12 @@ async def list_workflows(
     skip: int,
     limit: int,
     status: str | None = None,
-) -> list[dict]:
+) -> list[WorkflowRun]:
     query: dict = {"tenant_id": tenant_id}
     if status:
         query["status"] = status
     cursor = db.workflow_runs.find(query).sort("created_at", -1).skip(skip).limit(limit)
-    return await cursor.to_list(length=limit)
+    return [WorkflowRun(**d) for d in await cursor.to_list(length=limit)]
 
 
 async def count_workflows(
@@ -79,19 +82,20 @@ async def create_task_run(db: AsyncIOMotorDatabase, data: dict) -> str:
 
 async def list_task_runs(
     db: AsyncIOMotorDatabase, tenant_id: str, workflow_run_id: str
-) -> list[dict]:
+) -> list[TaskRun]:
     cursor = db.task_runs.find(
         {"tenant_id": tenant_id, "workflow_run_id": workflow_run_id}
     ).sort("created_at", 1)
-    return await cursor.to_list(length=100)
+    return [TaskRun(**d) for d in await cursor.to_list(length=100)]
 
 
 async def get_task_run(
     db: AsyncIOMotorDatabase, tenant_id: str, task_id: str
-) -> dict | None:
-    return await db.task_runs.find_one(
+) -> TaskRun | None:
+    doc = await db.task_runs.find_one(
         {"_id": ObjectId(task_id), "tenant_id": tenant_id}
     )
+    return TaskRun(**doc) if doc else None
 
 
 async def update_task_status(

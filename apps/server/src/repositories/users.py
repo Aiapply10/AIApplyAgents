@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from models.users import User
+
 
 async def create_user(db: AsyncIOMotorDatabase, data: dict) -> str:
     data["created_at"] = datetime.now(timezone.utc)
@@ -13,27 +15,30 @@ async def create_user(db: AsyncIOMotorDatabase, data: dict) -> str:
     return str(result.inserted_id)
 
 
-async def get_user(db: AsyncIOMotorDatabase, tenant_id: str, user_id: str) -> dict | None:
-    return await db.users.find_one({"_id": ObjectId(user_id), "tenant_id": tenant_id})
+async def get_user(db: AsyncIOMotorDatabase, tenant_id: str, user_id: str) -> User | None:
+    doc = await db.users.find_one({"_id": ObjectId(user_id), "tenant_id": tenant_id})
+    return User(**doc) if doc else None
 
 
 async def get_user_by_supertokens_id(
     db: AsyncIOMotorDatabase, supertokens_user_id: str
-) -> dict | None:
-    return await db.users.find_one({"supertokens_user_id": supertokens_user_id})
+) -> User | None:
+    doc = await db.users.find_one({"supertokens_user_id": supertokens_user_id})
+    return User(**doc) if doc else None
 
 
 async def get_user_by_email(
     db: AsyncIOMotorDatabase, tenant_id: str, email: str
-) -> dict | None:
-    return await db.users.find_one({"tenant_id": tenant_id, "email": email})
+) -> User | None:
+    doc = await db.users.find_one({"tenant_id": tenant_id, "email": email})
+    return User(**doc) if doc else None
 
 
 async def list_users(
     db: AsyncIOMotorDatabase, tenant_id: str, skip: int, limit: int
-) -> list[dict]:
+) -> list[User]:
     cursor = db.users.find({"tenant_id": tenant_id}).skip(skip).limit(limit)
-    return await cursor.to_list(length=limit)
+    return [User(**d) for d in await cursor.to_list(length=limit)]
 
 
 async def count_users(db: AsyncIOMotorDatabase, tenant_id: str) -> int:

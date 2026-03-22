@@ -1,13 +1,12 @@
-"""ResumeService — orchestrates repository, parser, and extractor.
-
-All methods return data or None/False — never raise HTTP exceptions.
-The router is responsible for translating return values into HTTP responses.
-"""
+"""ResumeService — orchestrates repository, parser, and extractor."""
 
 import uuid
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from models.master_sections import MasterSections
+from models.profiles import UserProfile
+from models.resumes import MarkdownImport, Resume, ResumeCreate, ResumeUpdate
 from repositories import master_sections as ms_repo
 from repositories import resumes as repo
 from services.resume.extractor import (
@@ -22,25 +21,27 @@ from services.resume.markdown_parser import parse_markdown_to_sections, sections
 class ResumeService:
 
     async def list(self, db: AsyncIOMotorDatabase, tenant_id: str, user_id: str,
-                   skip: int = 0, limit: int = 50) -> list[dict]:
+                   skip: int = 0, limit: int = 50) -> list[Resume]:
         return await repo.list_resumes(db, tenant_id, user_id, skip, limit)
 
     async def get(self, db: AsyncIOMotorDatabase, tenant_id: str, user_id: str,
-                  resume_id: str) -> dict | None:
+                  resume_id: str) -> Resume | None:
         return await repo.get_resume(db, tenant_id, user_id, resume_id)
 
     async def create(self, db: AsyncIOMotorDatabase, tenant_id: str, user_id: str,
-                     data: dict) -> dict | None:
+                     body: ResumeCreate) -> Resume | None:
+        data = body.model_dump()
         data["tenant_id"] = tenant_id
         data["user_id"] = user_id
-        if "sections" in data:
-            data["sections"] = [s.model_dump() if hasattr(s, "model_dump") else s for s in data["sections"]]
+        data["sections"] = [s.model_dump() for s in body.sections]
         rid = await repo.create_resume(db, data)
         return await repo.get_resume(db, tenant_id, user_id, rid)
 
     async def update(self, db: AsyncIOMotorDatabase, tenant_id: str, user_id: str,
-                     resume_id: str, updates: dict) -> dict | None:
-        """Returns updated doc, or None if not found."""
+                     resume_id: str, body: ResumeUpdate) -> Resume | None:
+        updates = body.model_dump(exclude_unset=True)
+        if not updates:
+            return None
         if "sections" in updates and updates["sections"] is not None:
             updates["sections"] = [s.model_dump() if hasattr(s, "model_dump") else s for s in updates["sections"]]
         ok = await repo.update_resume(db, tenant_id, user_id, resume_id, updates)
@@ -50,42 +51,29 @@ class ResumeService:
 
     async def delete(self, db: AsyncIOMotorDatabase, tenant_id: str, user_id: str,
                      resume_id: str) -> bool:
-        """Returns True if deleted, False if not found."""
         return await repo.delete_resume(db, tenant_id, user_id, resume_id)
 
     async def create_from_profile(self, db: AsyncIOMotorDatabase, tenant_id: str,
-                                  user_id: str) -> dict | None:
-        """Returns resume doc, or None if profile not found."""
-        profile = await db.user_profiles.find_one({"tenant_id": tenant_id, "user_id": user_id})
-        if not profile:
+                                  user_id: str) -> Resume | None:
+        doc = await db.user_profiles.find_one({"tenant_id": tenant_id, "user_id": user_id})
+        if not doc:
             return None
-        name = profile.get("full_name", "My Resume")
-        sections = sections_from_profile(profile)
-        return await self.create(db, tenant_id, user_id, {
-            "title": f"{name}'s Resume", "target_role": "", "sections": sections, "is_default": False,
-        })
+        profile = UserProfile(**doc)
+        name = profile.full_name or "My Resume"
+        sections = sections_from_profile(profile.model_dump())
+        return await self._create_internal(db, tenant_id, user_id,
+                                           f"{name}'s Resume", "", sections)
 
     async def create_from_markdown(self, db: AsyncIOMotorDatabase, tenant_id: str,
-                                   user_id: str, title: str, target_role: str,
-                                   markdown: str) -> dict | None:
-        """Returns resume doc, or None if markdown yielded no sections."""
-        sections = parse_markdown_to_sections(markdown)
+                                   user_id: str, body: MarkdownImport) -> Resume | None:
+        sections = parse_markdown_to_sections(body.markdown)
         if not sections:
             return None
-        return await self.create(db, tenant_id, user_id, {
-            "title": title, "target_role": target_role, "sections": sections, "is_default": False,
-        })
+        return await self._create_internal(db, tenant_id, user_id,
+                                           body.title, body.target_role, sections)
 
     async def extract_from_file(self, db: AsyncIOMotorDatabase, tenant_id: str,
-                                user_id: str, filename: str, file_bytes: bytes) -> dict | str:
-        """Returns resume doc on success, or an error string on failure.
-
-        Possible error strings:
-          - "unsupported_type"
-          - "file_too_large"
-          - "insufficient_text"
-          - "extraction_failed: <detail>"
-        """
+                                user_id: str, filename: str, file_bytes: bytes) -> Resume | str:
         ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
         if ext not in ("pdf", "docx"):
             return "unsupported_type"
@@ -101,24 +89,43 @@ class ResumeService:
         except ExtractionError as e:
             return f"extraction_failed: {e}"
 
-        sections: list[dict] = []
+        sections_data: list[dict] = []
         for s in extracted.get("sections", []):
             s.setdefault("id", str(uuid.uuid4()))
             s.setdefault("visible", True)
             s.setdefault("content", "")
             s.setdefault("items", [])
             s.setdefault("entries", [])
-            sections.append(s)
+            sections_data.append(s)
 
-        doc = await self.create(db, tenant_id, user_id, {
-            "title": extracted.get("title", filename.rsplit(".", 1)[0]),
-            "target_role": extracted.get("target_role", ""),
-            "sections": sections, "is_default": False,
-        })
+        from models.resumes import ResumeSection
+        sections = [ResumeSection(**s) for s in sections_data]
+
+        resume = await self._create_internal(
+            db, tenant_id, user_id,
+            extracted.get("title", filename.rsplit(".", 1)[0]),
+            extracted.get("target_role", ""),
+            sections,
+        )
 
         # Backfill master sections if empty
-        existing = await ms_repo.get_master_sections(db, tenant_id, user_id)
-        if not existing or not existing.get("sections"):
-            await ms_repo.upsert_master_sections(db, tenant_id, user_id, sections)
+        existing: MasterSections | None = await ms_repo.get_master_sections(db, tenant_id, user_id)
+        if not existing or not existing.sections:
+            await ms_repo.upsert_master_sections(db, tenant_id, user_id, sections_data)
 
-        return doc
+        return resume
+
+    async def _create_internal(self, db: AsyncIOMotorDatabase, tenant_id: str,
+                               user_id: str, title: str, target_role: str,
+                               sections) -> Resume | None:
+        """Internal helper for creating resumes from parsed/extracted data."""
+        data = {
+            "tenant_id": tenant_id,
+            "user_id": user_id,
+            "title": title,
+            "target_role": target_role,
+            "sections": [s.model_dump() if hasattr(s, "model_dump") else s for s in sections],
+            "is_default": False,
+        }
+        rid = await repo.create_resume(db, data)
+        return await repo.get_resume(db, tenant_id, user_id, rid)

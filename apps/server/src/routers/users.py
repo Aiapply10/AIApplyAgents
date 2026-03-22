@@ -4,59 +4,43 @@ from fastapi import APIRouter, HTTPException
 
 from dependencies import AdminUser, DB, ManagerUser, Pagination, TenantId
 from models.users import User, UserCreate, UserUpdate
-from repositories import users as repo
+from services.users import UserService
 
 router = APIRouter(prefix="/users", tags=["users"])
+_svc = UserService()
 
 
 @router.post("", status_code=201)
-async def create_user(
-    body: UserCreate, db: DB, tenant_id: TenantId, _admin: AdminUser
-) -> User:
-    existing = await repo.get_user_by_email(db, tenant_id, body.email)
-    if existing:
+async def create_user(body: UserCreate, db: DB, tenant_id: TenantId, _admin: AdminUser) -> User:
+    result = await _svc.create(db, tenant_id, body)
+    if result == "email_conflict":
         raise HTTPException(409, f"User with email '{body.email}' already exists")
-    data = body.model_dump()
-    data["tenant_id"] = tenant_id
-    doc_id = await repo.create_user(db, data)
-    doc = await repo.get_user(db, tenant_id, str(doc_id))
-    return User(**doc)
+    return result
 
 
 @router.get("")
-async def list_users(
-    db: DB, tenant_id: TenantId, page: Pagination, _manager: ManagerUser
-) -> list[User]:
-    docs = await repo.list_users(db, tenant_id, page.skip, page.limit)
-    return [User(**d) for d in docs]
+async def list_users(db: DB, tenant_id: TenantId, page: Pagination, _manager: ManagerUser) -> list[User]:
+    return await _svc.list(db, tenant_id, page.skip, page.limit)
 
 
 @router.get("/{user_id}")
 async def get_user(user_id: str, db: DB, tenant_id: TenantId) -> User:
-    doc = await repo.get_user(db, tenant_id, user_id)
-    if not doc:
+    user = await _svc.get(db, tenant_id, user_id)
+    if not user:
         raise HTTPException(404, "User not found")
-    return User(**doc)
+    return user
 
 
 @router.patch("/{user_id}")
-async def update_user(
-    user_id: str, body: UserUpdate, db: DB, tenant_id: TenantId, _admin: AdminUser
-) -> User:
-    updates = body.model_dump(exclude_unset=True)
-    if not updates:
-        raise HTTPException(422, "No fields to update")
-    ok = await repo.update_user(db, tenant_id, user_id, updates)
-    if not ok:
+async def update_user(user_id: str, body: UserUpdate, db: DB, tenant_id: TenantId, _admin: AdminUser) -> User:
+    user = await _svc.update(db, tenant_id, user_id, body)
+    if not user:
         raise HTTPException(404, "User not found")
-    doc = await repo.get_user(db, tenant_id, user_id)
-    return User(**doc)
+    return user
 
 
 @router.delete("/{user_id}", status_code=204)
-async def delete_user(
-    user_id: str, db: DB, tenant_id: TenantId, _admin: AdminUser
-) -> None:
-    ok = await repo.delete_user(db, tenant_id, user_id)
+async def delete_user(user_id: str, db: DB, tenant_id: TenantId, _admin: AdminUser) -> None:
+    ok = await _svc.delete(db, tenant_id, user_id)
     if not ok:
         raise HTTPException(404, "User not found")

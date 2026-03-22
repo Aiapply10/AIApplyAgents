@@ -3,7 +3,7 @@
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
 from dependencies import DB, CurrentUser, Pagination, TenantId
-from models.resumes import MarkdownImport, ResumeCreate, ResumeUpdate
+from models.resumes import MarkdownImport, Resume, ResumeCreate, ResumeUpdate
 from services.resume import ResumeService
 from services.resume.analyzer import analyze
 
@@ -25,35 +25,32 @@ def _uid(user: dict) -> str:
 
 
 @router.get("")
-async def list_resumes(db: DB, tenant_id: TenantId, user: CurrentUser, page: Pagination) -> list[dict]:
+async def list_resumes(db: DB, tenant_id: TenantId, user: CurrentUser, page: Pagination) -> list[Resume]:
     return await _svc.list(db, tenant_id, _uid(user), page.skip, page.limit)
 
 
 @router.get("/{resume_id}")
-async def get_resume(resume_id: str, db: DB, tenant_id: TenantId, user: CurrentUser) -> dict:
-    doc = await _svc.get(db, tenant_id, _uid(user), resume_id)
-    if not doc:
+async def get_resume(resume_id: str, db: DB, tenant_id: TenantId, user: CurrentUser) -> Resume:
+    resume = await _svc.get(db, tenant_id, _uid(user), resume_id)
+    if not resume:
         raise HTTPException(404, "Resume not found")
-    return doc
+    return resume
 
 
 @router.post("", status_code=201)
-async def create_resume(body: ResumeCreate, db: DB, tenant_id: TenantId, user: CurrentUser) -> dict:
-    doc = await _svc.create(db, tenant_id, _uid(user), body.model_dump())
-    if not doc:
+async def create_resume(body: ResumeCreate, db: DB, tenant_id: TenantId, user: CurrentUser) -> Resume:
+    resume = await _svc.create(db, tenant_id, _uid(user), body)
+    if not resume:
         raise HTTPException(500, "Failed to create resume")
-    return doc
+    return resume
 
 
 @router.patch("/{resume_id}")
-async def update_resume(resume_id: str, body: ResumeUpdate, db: DB, tenant_id: TenantId, user: CurrentUser) -> dict:
-    updates = body.model_dump(exclude_unset=True)
-    if not updates:
-        raise HTTPException(422, "No fields to update")
-    doc = await _svc.update(db, tenant_id, _uid(user), resume_id, updates)
-    if not doc:
+async def update_resume(resume_id: str, body: ResumeUpdate, db: DB, tenant_id: TenantId, user: CurrentUser) -> Resume:
+    resume = await _svc.update(db, tenant_id, _uid(user), resume_id, body)
+    if not resume:
         raise HTTPException(404, "Resume not found")
-    return doc
+    return resume
 
 
 @router.delete("/{resume_id}", status_code=204)
@@ -67,23 +64,23 @@ async def delete_resume(resume_id: str, db: DB, tenant_id: TenantId, user: Curre
 
 
 @router.post("/from-profile", status_code=201)
-async def create_from_profile(db: DB, tenant_id: TenantId, user: CurrentUser) -> dict:
-    doc = await _svc.create_from_profile(db, tenant_id, _uid(user))
-    if not doc:
+async def create_from_profile(db: DB, tenant_id: TenantId, user: CurrentUser) -> Resume:
+    resume = await _svc.create_from_profile(db, tenant_id, _uid(user))
+    if not resume:
         raise HTTPException(404, "Profile not found — complete your profile first")
-    return doc
+    return resume
 
 
 @router.post("/from-markdown", status_code=201)
-async def create_from_markdown(body: MarkdownImport, db: DB, tenant_id: TenantId, user: CurrentUser) -> dict:
-    doc = await _svc.create_from_markdown(db, tenant_id, _uid(user), body.title, body.target_role, body.markdown)
-    if not doc:
+async def create_from_markdown(body: MarkdownImport, db: DB, tenant_id: TenantId, user: CurrentUser) -> Resume:
+    resume = await _svc.create_from_markdown(db, tenant_id, _uid(user), body)
+    if not resume:
         raise HTTPException(422, "Could not parse any sections from the markdown")
-    return doc
+    return resume
 
 
 @router.post("/extract", status_code=201)
-async def extract_from_file(db: DB, tenant_id: TenantId, user: CurrentUser, file: UploadFile = File(...)) -> dict:
+async def extract_from_file(db: DB, tenant_id: TenantId, user: CurrentUser, file: UploadFile = File(...)) -> Resume:
     if not file.filename:
         raise HTTPException(422, "No file provided")
     file_bytes = await file.read()
@@ -104,7 +101,7 @@ async def extract_from_file(db: DB, tenant_id: TenantId, user: CurrentUser, file
 
 @router.post("/{resume_id}/analyze")
 async def analyze_resume(resume_id: str, body: dict, db: DB, tenant_id: TenantId, user: CurrentUser) -> dict:
-    doc = await _svc.get(db, tenant_id, _uid(user), resume_id)
-    if not doc:
+    resume = await _svc.get(db, tenant_id, _uid(user), resume_id)
+    if not resume:
         raise HTTPException(404, "Resume not found")
-    return analyze(doc, body.get("target_role"), body.get("job_description"))
+    return analyze(resume.model_dump(), body.get("target_role"), body.get("job_description"))

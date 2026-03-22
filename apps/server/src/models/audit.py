@@ -21,16 +21,16 @@ class AuditEvent(TenantDoc):
 
 class AuditEventCreate(BaseModel):
     actor_id: PyObjectId | None = None
-    action: str
-    resource_type: str
+    action: str = Field(min_length=1, max_length=100)
+    resource_type: str = Field(min_length=1, max_length=100)
     resource_id: PyObjectId
     detail: dict[str, Any] = {}
-    ip_address: str | None = None
+    ip_address: str | None = Field(default=None, max_length=45)
 
 
 class Notification(TenantDoc):
     user_id: PyObjectId
-    type: str  # application_submitted, workflow_completed, error
+    type: str
     title: str
     body: str
     status: NotificationStatus = NotificationStatus.unread
@@ -40,8 +40,8 @@ class Notification(TenantDoc):
 
 class NotificationCreate(BaseModel):
     user_id: PyObjectId
-    type: str
-    title: str
-    body: str
-    link: str | None = None
+    type: str = Field(min_length=1, max_length=100)
+    title: str = Field(min_length=1, max_length=500)
+    body: str = Field(min_length=1, max_length=5000)
+    link: str | None = Field(default=None, max_length=2000)
     metadata: dict[str, Any] = {}

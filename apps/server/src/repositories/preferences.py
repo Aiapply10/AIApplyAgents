@@ -4,6 +4,8 @@ from datetime import datetime, timezone
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from models.preferences import AutomationPolicy, JobPreference
+
 
 # ── job_preferences ──
 
@@ -26,10 +28,11 @@ async def upsert_preference(
 
 async def get_preference(
     db: AsyncIOMotorDatabase, tenant_id: str, user_id: str
-) -> dict | None:
-    return await db.job_preferences.find_one(
+) -> JobPreference | None:
+    doc = await db.job_preferences.find_one(
         {"tenant_id": tenant_id, "user_id": user_id}
     )
+    return JobPreference(**doc) if doc else None
 
 
 async def delete_preference(
@@ -64,10 +67,11 @@ async def upsert_policy(
 
 async def get_policy(
     db: AsyncIOMotorDatabase, tenant_id: str, user_id: str
-) -> dict | None:
-    return await db.automation_policies.find_one(
+) -> AutomationPolicy | None:
+    doc = await db.automation_policies.find_one(
         {"tenant_id": tenant_id, "user_id": user_id}
     )
+    return AutomationPolicy(**doc) if doc else None
 
 
 async def delete_policy(

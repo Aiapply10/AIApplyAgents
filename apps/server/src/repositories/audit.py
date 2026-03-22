@@ -4,6 +4,8 @@ from datetime import datetime, timezone
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from models.audit import AuditEvent
+
 
 async def create_event(db: AsyncIOMotorDatabase, data: dict) -> str:
     data.setdefault("timestamp", datetime.now(timezone.utc))
@@ -20,7 +22,7 @@ async def list_events(
     limit: int,
     resource_type: str | None = None,
     resource_id: str | None = None,
-) -> list[dict]:
+) -> list[AuditEvent]:
     query: dict = {"tenant_id": tenant_id}
     if resource_type:
         query["resource_type"] = resource_type
@@ -29,7 +31,7 @@ async def list_events(
     cursor = (
         db.audit_events.find(query).sort("timestamp", -1).skip(skip).limit(limit)
     )
-    return await cursor.to_list(length=limit)
+    return [AuditEvent(**d) for d in await cursor.to_list(length=limit)]
 
 
 async def count_events(
