@@ -4,13 +4,16 @@ from datetime import datetime, timezone
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from models.master_sections import MasterSections
+
 
 async def get_master_sections(
     db: AsyncIOMotorDatabase, tenant_id: str, user_id: str
-) -> dict | None:
-    return await db.master_sections.find_one(
+) -> MasterSections | None:
+    doc = await db.master_sections.find_one(
         {"tenant_id": tenant_id, "user_id": user_id}
     )
+    return MasterSections(**doc) if doc else None
 
 
 async def upsert_master_sections(
@@ -31,5 +34,5 @@ async def upsert_master_sections(
     )
     if result.upserted_id:
         return str(result.upserted_id)
-    doc = await get_master_sections(db, tenant_id, user_id)
+    doc = await db.master_sections.find_one({"tenant_id": tenant_id, "user_id": user_id})
     return str(doc["_id"]) if doc else ""

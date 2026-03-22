@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from models.profiles import UserDocument, UserProfile
+
 
 # ── user_profiles ──
 
@@ -27,10 +29,11 @@ async def upsert_profile(
 
 async def get_profile(
     db: AsyncIOMotorDatabase, tenant_id: str, user_id: str
-) -> dict | None:
-    return await db.user_profiles.find_one(
+) -> UserProfile | None:
+    doc = await db.user_profiles.find_one(
         {"tenant_id": tenant_id, "user_id": user_id}
     )
+    return UserProfile(**doc) if doc else None
 
 
 async def delete_profile(
@@ -56,17 +59,18 @@ async def create_document(
 
 async def get_document(
     db: AsyncIOMotorDatabase, tenant_id: str, doc_id: str
-) -> dict | None:
-    return await db.user_documents.find_one(
+) -> UserDocument | None:
+    doc = await db.user_documents.find_one(
         {"_id": ObjectId(doc_id), "tenant_id": tenant_id}
     )
+    return UserDocument(**doc) if doc else None
 
 
 async def list_documents(
     db: AsyncIOMotorDatabase, tenant_id: str, user_id: str
-) -> list[dict]:
+) -> list[UserDocument]:
     cursor = db.user_documents.find({"tenant_id": tenant_id, "user_id": user_id})
-    return await cursor.to_list(length=100)
+    return [UserDocument(**d) for d in await cursor.to_list(length=100)]
 
 
 async def delete_document(
