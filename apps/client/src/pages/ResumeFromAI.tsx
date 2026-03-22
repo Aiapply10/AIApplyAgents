@@ -105,7 +105,7 @@ export default function ResumeFromAI() {
       setToast({ message: error, type: "error" });
       setCreating(false);
     } else if (data) {
-      navigate(`/resumes/${data._id}`, { replace: true });
+      navigate(`/resumes/${data.id}`, { replace: true });
     }
   }
 

@@ -51,7 +51,7 @@ export default function ResumeAnalyzer() {
 
   const resumeOptions = useMemo(
     () => resumes.map((r) => ({
-      value: r._id ?? "",
+      value: r.id ?? "",
       label: `${r.title}${r.target_role ? ` — ${r.target_role}` : ""}`,
     })),
     [resumes],
@@ -71,10 +71,10 @@ export default function ResumeAnalyzer() {
   useEffect(() => {
     if (resumes.length === 0) return;
     if (!selectedId) {
-      setSelectedId(resumes[0]._id);
+      setSelectedId(resumes[0].id);
       if (resumes[0].target_role) setTargetRole(resumes[0].target_role);
     } else {
-      const r = resumes.find((r) => r._id === selectedId);
+      const r = resumes.find((r) => r.id === selectedId);
       if (r?.target_role && !targetRole) setTargetRole(r.target_role);
       if (preselectedId && !autoTriggered.current) {
         autoTriggered.current = true;
@@ -86,7 +86,7 @@ export default function ResumeAnalyzer() {
   function handleSelectResume(id: string) {
     setSelectedId(id);
     setResult(null);
-    const r = resumes.find((r) => r._id === id);
+    const r = resumes.find((r) => r.id === id);
     if (r?.target_role) setTargetRole(r.target_role);
   }
 

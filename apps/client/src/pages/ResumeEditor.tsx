@@ -174,7 +174,7 @@ function buildDraftFromProfile(profile: {
 
   // Remaining sections added by ensureAllSections
   return {
-    _id: "",
+    id: "",
     title: "Untitled",
     target_role: "",
     sections: ensureAllSections(sections),
@@ -241,7 +241,7 @@ export default function ResumeEditor() {
     }
     data.sections = ensureAllSections(data.sections);
     setResume(data);
-    setResumeId(data._id);
+    setResumeId(data.id);
     lastSavedSnapshot.current = snapshot(data);
     setDirty(false);
     setLoading(false);
@@ -277,9 +277,9 @@ export default function ResumeEditor() {
       savingRef.current = true;
       setSaving(true);
 
-      if (updated._id) {
+      if (updated.id) {
         // Existing resume — PATCH
-        const { error } = await updateResume(updated._id, {
+        const { error } = await updateResume(updated.id, {
           title: updated.title,
           target_role: updated.target_role,
           sections: updated.sections,
@@ -300,12 +300,12 @@ export default function ResumeEditor() {
         if (error) {
           setToast({ message: error, type: "error" });
         } else if (data) {
-          setResumeId(data._id);
-          setResume((prev) => prev ? { ...prev, _id: data._id } : prev);
+          setResumeId(data.id);
+          setResume((prev) => prev ? { ...prev, _id: data.id } : prev);
           lastSavedSnapshot.current = currentSnapshot;
           setDirty(false);
           // Update URL without full reload
-          window.history.replaceState(null, "", `/resumes/${data._id}`);
+          window.history.replaceState(null, "", `/resumes/${data.id}`);
         }
       }
 

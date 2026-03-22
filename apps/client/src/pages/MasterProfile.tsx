@@ -118,7 +118,7 @@ export default function MasterProfile() {
       return;
     }
     // Then import that resume's sections into master
-    const importRes = await importToMasterSections(extractRes.data._id);
+    const importRes = await importToMasterSections(extractRes.data.id);
     setImporting(false);
     if (importRes.error) {
       setToast({ message: importRes.error, type: "error" });
@@ -335,8 +335,8 @@ export default function MasterProfile() {
                   <div className="space-y-1.5 max-h-80 overflow-y-auto">
                     {resumes.map((r) => (
                       <button
-                        key={r._id}
-                        onClick={() => handleImportFromResume(r._id)}
+                        key={r.id}
+                        onClick={() => handleImportFromResume(r.id)}
                         className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-(--color-surface-sunken) transition-all duration-150 cursor-pointer text-left"
                       >
                         <div className="w-8 h-8 rounded-lg accent-gradient flex items-center justify-center shrink-0">

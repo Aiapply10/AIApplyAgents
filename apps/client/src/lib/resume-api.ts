@@ -35,7 +35,7 @@ export interface ResumeSection {
 }
 
 export interface Resume {
-  _id: string;
+  id: string;
   title: string;
   target_role: string;
   sections: ResumeSection[];
