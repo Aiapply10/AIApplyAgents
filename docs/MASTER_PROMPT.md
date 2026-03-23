@@ -2,6 +2,8 @@
 
 Paste this as-is into a strong coding agent, or use as the operating spec for a multi-agent workflow.
 
+**See also:** [Documentation index](./README.md) (architecture diagrams, MongoDB ERD sketch, per-service notes) and the expanded [prompt guide](./prompt-guide.md).
+
 ## Platform Summary
 
 3 core systems:
@@ -41,7 +43,11 @@ Architecture: Multi-tenant microservices, resumable state-machine workflows, ~10
 
 ## Core Collections (MongoDB)
 
-tenants, users, user_profiles, user_documents, job_preferences, automation_policies, job_sources, fetch_runs, job_postings, job_matches, workflow_runs, task_runs, application_runs, application_attempts, artifacts, audit_events, notifications
+**Implemented in Control Service** (`apps/server`, database default `ai_apply_agents`) — see `docs/data-model-mongodb.md` for field-level detail and indexes.
+
+`tenants`, `users`, `user_profiles`, `user_documents`, `master_sections`, `resumes`, `job_preferences`, `automation_policies`, `job_sources`, `job_postings`, `fetch_runs`, `job_matches`, `workflow_runs`, `task_runs`, `application_runs`, `application_attempts`, `artifacts`, `audit_events`, `notifications`
+
+**Related:** Job Applier keeps **SQLite** flow checkpoints (`packages/jobs_applier`, `bot_state.db`) separate from MongoDB; SuperTokens uses its **own** PostgreSQL for auth core metadata.
 
 ---
 

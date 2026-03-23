@@ -6,6 +6,8 @@ Multi-tenant job auto-apply platform. Control Service orchestrates; Job Fetcher 
 
 **Stack:** React + TypeScript + Tailwind + Vite + Bun | FastAPI + Python | Camoufox | MongoDB
 
+**Docs:** `docs/data-model-mongodb.md` (MongoDB collections + indexes); `docs/README.md` (index).
+
 ## Commands
 
 ```bash

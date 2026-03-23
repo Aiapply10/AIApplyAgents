@@ -1,6 +1,6 @@
 # AI Apply Agents — Agent Instructions
 
-Multi-tenant job auto-apply platform. See `docs/MASTER_PROMPT.md` for the full multi-agent build plan.
+Multi-tenant job auto-apply platform. See `docs/README.md` for architecture and `docs/data-model-mongodb.md` for **implemented MongoDB collections**; `docs/MASTER_PROMPT.md` for the multi-agent build plan.
 
 ## Project Overview
 
@@ -33,6 +33,10 @@ Python deps: `uv add <pkg> --package server|jobs-scraper|jobs-applier` then `uv 
 | **Job Applier** | browser automation, form filling, step traces, artifacts | user CRUD, matching, fetching |
 | **Control Service** | users, profiles, workflows, orchestration, audit | board scraping, browser automation |
 | **Frontend** | UI, forms, monitoring views | backend business logic |
+
+## MongoDB (Control Service)
+
+Single application database (default `ai_apply_agents`): tenants, users, user_profiles, user_documents, master_sections, resumes, job_preferences, automation_policies, job_sources, job_postings, job_matches, fetch_runs, workflow_runs, task_runs, application_runs, application_attempts, artifacts, audit_events, notifications. Models: `apps/server/src/models/`; indexes: `apps/server/src/db.py`.
 
 ## Global Rules
 

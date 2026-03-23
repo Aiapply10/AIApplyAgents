@@ -6,6 +6,8 @@ Multi-tenant job auto-apply platform with three core systems: **Job Fetcher** (s
 
 Stack: React + TypeScript + Tailwind + Vite + Bun (frontend) | FastAPI + Python (backend) | Camoufox (browser) | MongoDB.
 
+MongoDB schema (collections, indexes): `docs/data-model-mongodb.md`. Doc index: `docs/README.md`.
+
 ## Common Commands
 
 ```bash

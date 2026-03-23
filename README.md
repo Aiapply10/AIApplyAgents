@@ -2,6 +2,14 @@
 
 Multi-tenant job auto-apply platform with AI-powered resume building and tailoring. Three core services: **Control Service** (orchestration, APIs, UI), **Job Fetcher** (scraping/APIs), and **Job Applier** (browser automation).
 
+## Documentation
+
+- **[docs/README.md](docs/README.md)** — Index of architecture docs and planning prompts.
+- **[docs/data-model-mongodb.md](docs/data-model-mongodb.md)** — **MongoDB collections, models, enums, and indexes** (Control Service).
+- **[docs/architecture.md](docs/architecture.md)** — System-wide architecture (control vs execution plane, Mermaid diagrams).
+- **[docs/architecture-control-service.md](docs/architecture-control-service.md)** — Control Service routers, auth, storage.
+- **[docs/MASTER_PROMPT.md](docs/MASTER_PROMPT.md)** — Multi-agent build plan and agent topology.
+
 ## Tech Stack
 
 | Technology | Purpose |
