@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeIgnitor — Your job search, handled.</title>
+  <meta name="description" content="CodeIgnitor scrapes job boards, tailors your resume, and applies for you. You just show up to interviews." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+  <!-- ═══════ NAV ═══════ -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <div class="logo-mark">C</div>
+        <span>CodeIgnitor</span>
+      </a>
+      <div class="nav-links">
+        <a href="#what-we-do">What We Do</a>
+        <a href="#how-it-works">How It Works</a>
+      </div>
+      <div class="nav-actions">
+        <a href="/app" class="btn btn-ghost">Log in</a>
+        <a href="/app" class="btn btn-primary">Try it free</a>
+      </div>
+      <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" id="mobile-menu">
+      <a href="#what-we-do">What We Do</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#pricing">Pricing</a>
+      <hr />
+      <a href="/app" class="btn btn-ghost mobile-btn">Log in</a>
+      <a href="/app" class="btn btn-primary mobile-btn">Try it free</a>
+    </div>
+  </nav>
+
+  <!-- ═══════ HERO — asymmetric, left-aligned ═══════ -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-text">
+        <p class="hero-kicker anim" data-d="0">Job applications on autopilot</p>
+        <h1 class="anim" data-d="1">
+          You focus on interviews.<br />
+          <span class="text-gradient">We handle the rest.</span>
+        </h1>
+        <p class="hero-body anim" data-d="2">
+          CodeIgnitor scrapes 30+ job boards, matches roles to your profile,
+          tailors your resume for each one, and hits submit. You don't lift a finger.
+        </p>
+        <div class="hero-ctas anim" data-d="3">
+          <a href="/app" class="btn btn-primary btn-lg">
+            Start for free
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+          <span class="hero-note">No credit card. Cancel anytime.</span>
+        </div>
+      </div>
+
+      <!-- Live activity feed mockup -->
+      <div class="hero-visual anim" data-d="2">
+        <div class="feed-window">
+          <div class="feed-topbar">
+            <div class="feed-dots"><span></span><span></span><span></span></div>
+            <span class="feed-title">Live Activity</span>
+            <span class="feed-status"><span class="pulse-dot"></span>Running</span>
+          </div>
+          <div class="feed-body" id="activity-feed">
+            <div class="feed-item feed-item-applied">
+              <span class="fi-icon fi-icon-check">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              <span class="fi-text">Applied to <strong>Senior Frontend Engineer</strong> at Stripe</span>
+              <span class="fi-time">2s ago</span>
+            </div>
+            <div class="feed-item feed-item-tailored">
+              <span class="fi-icon fi-icon-doc">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+              </span>
+              <span class="fi-text">Tailored resume for <strong>Product Designer</strong> at Figma</span>
+              <span class="fi-time">8s ago</span>
+            </div>
+            <div class="feed-item feed-item-matched">
+              <span class="fi-icon fi-icon-star">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3Z"/></svg>
+              </span>
+              <span class="fi-text">Matched 94% — <strong>Data Engineer</strong> at Airbnb</span>
+              <span class="fi-time">15s ago</span>
+            </div>
+            <div class="feed-item feed-item-applied">
+              <span class="fi-icon fi-icon-check">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              <span class="fi-text">Applied to <strong>Backend Engineer</strong> at Linear</span>
+              <span class="fi-time">22s ago</span>
+            </div>
+            <div class="feed-item feed-item-found">
+              <span class="fi-icon fi-icon-search">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              </span>
+              <span class="fi-text">Found 12 new roles on <strong>LinkedIn</strong></span>
+              <span class="fi-time">30s ago</span>
+            </div>
+            <div class="feed-item feed-item-tailored">
+              <span class="fi-icon fi-icon-doc">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+              </span>
+              <span class="fi-text">Tailored resume for <strong>ML Engineer</strong> at OpenAI</span>
+              <span class="fi-time">41s ago</span>
+            </div>
+          </div>
+          <div class="feed-footer">
+            <span class="feed-counter"><strong id="feed-count">247</strong> applications this week</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ TRUST STRIP — quiet confidence ═══════ -->
+  <section class="trust-strip">
+    <div class="container trust-row">
+      <div class="trust-item anim">
+        <strong data-count="50000">0</strong>
+        <span>applications submitted</span>
+      </div>
+      <div class="trust-sep"></div>
+      <div class="trust-item anim">
+        <strong data-count="4200">0</strong>
+        <span>people hired</span>
+      </div>
+      <div class="trust-sep"></div>
+      <div class="trust-item anim">
+        <strong>92%</strong>
+        <span>less time applying</span>
+      </div>
+      <div class="trust-sep"></div>
+      <div class="trust-item anim">
+        <strong>30+</strong>
+        <span>job boards covered</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ WHAT WE DO — bento grid ═══════ -->
+  <section class="section" id="what-we-do">
+    <div class="container">
+      <div class="section-intro anim">
+        <p class="section-kicker">What we do</p>
+        <h2>Four systems. One pipeline.<br/>Zero manual work.</h2>
+      </div>
+
+      <div class="bento">
+        <!-- Large card: Discovery -->
+        <div class="bento-card bento-wide anim">
+          <div class="bc-text">
+            <h3>Job Discovery</h3>
+            <p>We sweep LinkedIn, Indeed, Glassdoor, and 30+ boards every hour. Matching roles land in your pipeline before you even know they exist.</p>
+          </div>
+          <div class="bc-visual bc-visual-discovery">
+            <div class="mini-board">
+              <div class="mb-header">
+                <span class="mb-dot mb-dot-green"></span>
+                <span>LinkedIn &mdash; 142 new</span>
+              </div>
+              <div class="mb-header">
+                <span class="mb-dot mb-dot-blue"></span>
+                <span>Indeed &mdash; 89 new</span>
+              </div>
+              <div class="mb-header">
+                <span class="mb-dot mb-dot-orange"></span>
+                <span>Glassdoor &mdash; 64 new</span>
+              </div>
+              <div class="mb-header mb-header-muted">
+                <span class="mb-dot mb-dot-muted"></span>
+                <span>+27 more sources</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Regular card: Matching -->
+        <div class="bento-card anim">
+          <div class="bc-text">
+            <h3>AI Matching</h3>
+            <p>Semantic scoring rates every job against your skills and preferences. Only roles worth your time get through.</p>
+          </div>
+          <div class="bc-visual">
+            <div class="match-bars">
+              <div class="match-bar"><span class="match-fill" style="width:94%"></span><span class="match-label">Skills 94%</span></div>
+              <div class="match-bar"><span class="match-fill match-fill-med" style="width:87%"></span><span class="match-label">Experience 87%</span></div>
+              <div class="match-bar"><span class="match-fill match-fill-low" style="width:72%"></span><span class="match-label">Culture 72%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Regular card: Tailoring -->
+        <div class="bento-card anim">
+          <div class="bc-text">
+            <h3>Resume Tailoring</h3>
+            <p>Every application gets a custom resume. AI rewrites bullets, optimizes keywords, and mirrors what the job asks for.</p>
+          </div>
+          <div class="bc-visual">
+            <div class="tailor-diff">
+              <div class="td-line td-old">Led frontend development across teams</div>
+              <div class="td-line td-new">Led React/TypeScript frontend for 3 product teams, shipping 12 features in Q4</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Large card: Auto-Apply -->
+        <div class="bento-card bento-wide anim">
+          <div class="bc-text">
+            <h3>Auto-Apply</h3>
+            <p>Stealth browser automation fills out forms, uploads your tailored resume, answers screening questions, and hits submit. It behaves like a human because, well, we trained it on how humans actually apply.</p>
+          </div>
+          <div class="bc-visual bc-visual-pipeline">
+            <div class="pipeline">
+              <div class="pipe-node pipe-done">
+                <div class="pipe-dot"></div>
+                <span>Open portal</span>
+              </div>
+              <div class="pipe-line pipe-line-done"></div>
+              <div class="pipe-node pipe-done">
+                <div class="pipe-dot"></div>
+                <span>Fill form</span>
+              </div>
+              <div class="pipe-line pipe-line-done"></div>
+              <div class="pipe-node pipe-done">
+                <div class="pipe-dot"></div>
+                <span>Upload resume</span>
+              </div>
+              <div class="pipe-line pipe-line-active"></div>
+              <div class="pipe-node pipe-active">
+                <div class="pipe-dot"></div>
+                <span>Submit</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ HOW IT WORKS — horizontal ═══════ -->
+  <section class="section section-warm" id="how-it-works">
+    <div class="container">
+      <div class="section-intro anim">
+        <p class="section-kicker">How it works</p>
+        <h2>Set it up once. Let it run.</h2>
+        <p class="section-body">Three things from you, then we take it from there.</p>
+      </div>
+
+      <div class="steps-row">
+        <div class="step-card anim">
+          <div class="sc-num">1</div>
+          <h3>Upload your resume</h3>
+          <p>Drop a PDF, paste from ChatGPT, or fill out a quick form. We extract everything into your master profile.</p>
+        </div>
+        <div class="step-arrow anim">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </div>
+        <div class="step-card anim">
+          <div class="sc-num">2</div>
+          <h3>Tell us what you want</h3>
+          <p>Pick target roles, locations, salary range, company size. Set your boundaries — the engine respects them.</p>
+        </div>
+        <div class="step-arrow anim">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </div>
+        <div class="step-card anim">
+          <div class="sc-num">3</div>
+          <h3>Go do something else</h3>
+          <p>Seriously. Go for a walk, prep for interviews, learn a new skill. Check your dashboard whenever you feel like it.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ SOCIAL PROOF — single rotating quote ═══════ -->
+  <section class="section">
+    <div class="container">
+      <div class="quote-block anim">
+        <svg class="quote-mark" width="48" height="48" viewBox="0 0 24 24" fill="var(--accent-subtle)" stroke="none"><path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311C9.591 11.68 11 13.166 11 15c0 1.933-1.567 3.5-3.5 3.5-1.282 0-2.456-.582-2.917-1.179zM14.583 17.321C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311C19.591 11.68 21 13.166 21 15c0 1.933-1.567 3.5-3.5 3.5-1.282 0-2.456-.582-2.917-1.179z"/></svg>
+        <div class="quote-carousel" id="quote-carousel">
+          <blockquote class="quote-slide active">
+            <p>I was spending 4 hours a day copy-pasting into application forms. Now I spend that time actually preparing for interviews. Got 8 callbacks in my first week.</p>
+            <cite>
+              <strong>Priya Sharma</strong>
+              <span>Landed Senior SWE at Google</span>
+            </cite>
+          </blockquote>
+          <blockquote class="quote-slide">
+            <p>The resume tailoring alone is worth it. My response rate went from 3% to 22%. Each application had a resume that read like I wrote it specifically for that company.</p>
+            <cite>
+              <strong>Marcus Johnson</strong>
+              <span>Landed PM at Stripe</span>
+            </cite>
+          </blockquote>
+          <blockquote class="quote-slide">
+            <p>As a career changer, I needed volume without sacrificing quality. CodeIgnitor applied to 500+ relevant roles in 3 weeks. The matching understood my transferable skills better than I did.</p>
+            <cite>
+              <strong>Elena Rodriguez</strong>
+              <span>Landed Data Analyst at Netflix</span>
+            </cite>
+          </blockquote>
+        </div>
+        <div class="quote-dots" id="quote-dots">
+          <button class="qd active" data-i="0"></button>
+          <button class="qd" data-i="1"></button>
+          <button class="qd" data-i="2"></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ FINAL CTA — casual ═══════ -->
+  <section class="section">
+    <div class="container">
+      <div class="cta-block anim">
+        <h2>Ready when you are.</h2>
+        <p>Set up takes about 5 minutes. After that, your job search runs itself.</p>
+        <a href="/app" class="btn btn-primary btn-lg">
+          Try CodeIgnitor free
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ FOOTER ═══════ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="#" class="nav-logo">
+            <div class="logo-mark">C</div>
+            <span>CodeIgnitor</span>
+          </a>
+          <p>Your job search, handled.</p>
+        </div>
+        <div class="footer-links">
+          <div class="footer-col">
+            <h4>Product</h4>
+            <a href="#what-we-do">Features</a>
+                <a href="#how-it-works">How It Works</a>
+            <a href="/app">Dashboard</a>
+          </div>
+          <div class="footer-col">
+            <h4>Company</h4>
+            <a href="#">About</a>
+            <a href="#">Blog</a>
+            <a href="#">Careers</a>
+          </div>
+          <div class="footer-col">
+            <h4>Legal</h4>
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 CodeIgnitor</p>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="/main.js"></script>
+</body>
+</html>

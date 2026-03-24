@@ -41,6 +41,13 @@
         "vite": "^6.0.3",
       },
     },
+    "apps/landing": {
+      "name": "@repo/landing",
+      "version": "0.1.0",
+      "devDependencies": {
+        "vite": "^6.0.3",
+      },
+    },
     "apps/server": {
       "name": "@repo/server",
       "version": "0.1.0",
@@ -188,6 +195,8 @@
     "@repo/jobs-applier": ["@repo/jobs-applier@workspace:packages/jobs_applier"],
 
     "@repo/jobs-scraper": ["@repo/jobs-scraper@workspace:packages/jobs_scraper"],
+
+    "@repo/landing": ["@repo/landing@workspace:apps/landing"],
 
     "@repo/server": ["@repo/server@workspace:apps/server"],
 
